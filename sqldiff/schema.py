@@ -1,4 +1,4 @@
-"""Data models representing database schema objects."""
+"""Schema data model for sqldiff."""
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
@@ -7,20 +7,18 @@ from typing import Dict, List, Optional
 @dataclass
 class Column:
     name: str
-    data_type: str
+    col_type: str
     nullable: bool = True
     default: Optional[str] = None
-    primary_key: bool = False
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Column):
             return NotImplemented
         return (
             self.name == other.name
-            and self.data_type == other.data_type
+            and self.col_type == other.col_type
             and self.nullable == other.nullable
             and self.default == other.default
-            and self.primary_key == other.primary_key
         )
 
 
@@ -30,26 +28,44 @@ class Index:
     columns: List[str]
     unique: bool = False
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Index):
+            return NotImplemented
+        return (
+            self.name == other.name
+            and self.columns == other.columns
+            and self.unique == other.unique
+        )
+
 
 @dataclass
 class Table:
     name: str
-    columns: Dict[str, Column] = field(default_factory=dict)
-    indexes: Dict[str, Index] = field(default_factory=dict)
+    columns: List[Column] = field(default_factory=list)
+    indexes: List[Index] = field(default_factory=list)
 
-    def add_column(self, column: Column) -> None:
-        self.columns[column.name] = column
+    def add_column(self, col: Column) -> None:
+        self.columns.append(col)
 
-    def add_index(self, index: Index) -> None:
-        self.indexes[index.name] = index
+    def remove_column(self, name: str) -> None:
+        self.columns = [c for c in self.columns if c.name != name]
+
+    def get_column(self, name: str) -> Optional[Column]:
+        return next((c for c in self.columns if c.name == name), None)
+
+    def add_index(self, idx: Index) -> None:
+        self.indexes.append(idx)
+
+    def get_index(self, name: str) -> Optional[Index]:
+        return next((i for i in self.indexes if i.name == name), None)
 
 
 @dataclass
 class Schema:
     tables: Dict[str, Table] = field(default_factory=dict)
 
-    def add_table(self, table: Table) -> None:
-        self.tables[table.name] = table
-
     def get_table(self, name: str) -> Optional[Table]:
         return self.tables.get(name)
+
+    def table_names(self) -> List[str]:
+        return list(self.tables.keys())
