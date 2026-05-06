@@ -24,6 +24,23 @@ class SchemaDiff:
             self.columns_modified,
         ])
 
+    def summary(self) -> str:
+        """Return a human-readable summary of the diff."""
+        if not self.has_changes:
+            return "No changes detected."
+        lines = []
+        if self.tables_added:
+            lines.append(f"Tables added ({len(self.tables_added)}): {', '.join(self.tables_added)}")
+        if self.tables_removed:
+            lines.append(f"Tables removed ({len(self.tables_removed)}): {', '.join(self.tables_removed)}")
+        if self.columns_added:
+            lines.append(f"Columns added ({len(self.columns_added)}): {', '.join(self.columns_added)}")
+        if self.columns_removed:
+            lines.append(f"Columns removed ({len(self.columns_removed)}): {', '.join(self.columns_removed)}")
+        if self.columns_modified:
+            lines.append(f"Columns modified ({len(self.columns_modified)}): {', '.join(self.columns_modified)}")
+        return "\n".join(lines)
+
 
 def _diff_tables(old: Table, new: Table, diff: SchemaDiff) -> None:
     old_cols = set(old.columns.keys())
