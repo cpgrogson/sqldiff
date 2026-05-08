@@ -35,6 +35,18 @@ class ValidationResult:
     def __len__(self) -> int:
         return len(self.issues)
 
+    def summary(self) -> str:
+        """Return a human-readable summary of the validation result."""
+        if not self.issues:
+            return "Schema is valid with no issues."
+        parts = []
+        if self.errors:
+            parts.append(f"{len(self.errors)} error(s)")
+        if self.warnings:
+            parts.append(f"{len(self.warnings)} warning(s)")
+        status = "invalid" if not self.is_valid else "valid"
+        return f"Schema is {status}: {', '.join(parts)}."
+
 
 def _validate_table(table: Table) -> List[ValidationIssue]:
     issues: List[ValidationIssue] = []
