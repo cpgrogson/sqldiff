@@ -91,7 +91,16 @@ def _lint_table(table: Table) -> List[LintIssue]:
 
 
 def lint_schema(schema: Schema) -> LintResult:
-    """Run all lint rules over every table in *schema*."""
+    """Run all lint rules over every table in *schema*.
+
+    Args:
+        schema: The :class:`~sqldiff.schema.Schema` instance to inspect.
+
+    Returns:
+        A :class:`LintResult` containing all discovered issues.  Call
+        ``result.is_clean`` to check whether any issues were found, or iterate
+        over ``result.errors`` / ``result.warnings`` to filter by severity.
+    """
     result = LintResult()
     for table in schema.tables.values():
         result.issues.extend(_lint_table(table))
